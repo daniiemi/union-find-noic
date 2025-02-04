@@ -1,0 +1,131 @@
+#include <bits/stdc++.h>
+#define int long long
+#define pb push_back
+using namespace std;
+
+const int maxn=1e4+1;
+int id[maxn], peso[maxn], aux=-1;
+vector<set<int>> gp (1);
+//n linhas codadas p ainda dar errado num problema trivial
+//oi, eu to no código da daniela //caba bom
+
+int find(int x) {
+    if(id[x]<=0) return id[x]*-1;
+    return id[x]=find(id[x]);
+}
+bool check(int i, int j) {
+    if(gp[i].size()>gp[j].size()) swap(i,j);
+    for(const auto& it : gp[i]) {
+        if(gp[j].find(it)!=gp[j].end()) return true;
+    }
+    return false;
+}
+
+bool join(int a, int b) {
+    int x=find(a);
+    int y=find(b);
+
+    if(!x and !y) {
+        id[a]=aux, id[b]=aux;
+        aux-=2;
+        gp.pb({a,b}); gp.pb({});
+        return false;
+    } else if(!x or !y) {
+        if(!x) {
+            swap(x,y);
+            swap(a,b); //b eh o nao visto
+        }
+        id[b]=(-1*x);
+        return false;
+    }
+
+    int amg_a=x, amg_b=y, inmg_a, inmg_b;
+    if(x%2) inmg_a=x+1;
+    else inmg_a=x-1;
+    if(y%2) inmg_b=y+1;
+    else inmg_b=y-1;
+    
+    if(check(amg_a,inmg_b)) return true;
+    if(check(amg_b,inmg_a)) return true; //o(nlogm), m>n
+    int AMG_A = *gp[amg_a].begin();
+    int AMG_B = *gp[amg_b].begin();
+    int INMG_A = *gp[inmg_a].begin();
+    int INMG_B = *gp[inmg_b].begin();
+
+    if(peso[amg_a]<peso[amg_b]) { //convem q comece indo para b, puxando td dps
+        if(AMG_A) id[AMG_A]=(-1*amg_b);
+        if(INMG_A) id[INMG_A]=(-1*inmg_b);
+    } else {
+        if(AMG_B) id[AMG_B]=(-1*amg_a);
+        if(INMG_B) id[INMG_B]=(-1*inmg_a);
+    }
+    if(peso[amg_a]==peso[amg_b]) peso[amg_a]++;
+    
+    return false;
+}
+bool disjoin(int a, int b) {
+    int x=find(a);
+    int y=find(b);
+
+    if(!x and !y) {
+        id[a]=aux, id[b]=aux-1;
+        aux-=2;
+        gp.pb({a}); gp.pb({b});
+        return false;
+    } else if(!x or !y) {
+        if(!x) {
+            swap(x,y);
+            swap(a,b); //b eh o nao visto
+        }
+        if(x%2) id[b]=(x+1)*-1;
+        else id[b]=(x-1)*-1;
+        return false;
+    }
+
+    int amg_a=x, amg_b=y, inmg_a, inmg_b;
+    if(x%2) inmg_a=x+1;
+    else inmg_a=x-1;
+    if(y%2) inmg_b=y+1;
+    else inmg_b=y-1;
+    
+    if(check(amg_a,amg_b)) return true;
+    if(check(inmg_a,inmg_b)) return true;
+    int AMG_A = *gp[amg_a].begin();
+    int AMG_B = *gp[amg_b].begin();
+    int INMG_A = *gp[inmg_a].begin();
+    int INMG_B = *gp[inmg_b].begin();
+    
+    if(peso[amg_a]<peso[inmg_b]) {
+        if(AMG_A) id[AMG_A]=(-1*inmg_b);
+        if(INMG_A) id[INMG_A]=(-1*amg_b);
+    } else {
+        if(AMG_B) id[AMG_B]=(-1*inmg_a);
+        if(INMG_B) id[INMG_B]=(-1*amg_a);
+    }
+    if(peso[amg_a]==peso[inmg_b]) peso[amg_a]++;
+    
+    return false;
+}
+
+int32_t main() {
+    int n, c, x, y;
+    cin >> n;
+
+    while(cin >> c >> x >> y) {
+        x++, y++;
+        if(c==1 and join(x,y)) cout << -1 << endl;
+        else if(c==2 and disjoin(x,y)) cout << -1 << endl;
+        else if(c==3) {
+            x=find(x), y=find(y);
+            if(x==y and x!=0) cout << 1 << endl;
+            else cout << 0 << endl;
+        } else if(c==4) {
+            x=find(x), y=find(y);
+            if(x%2 and y==x+1) cout << 1 << endl;
+            else if(x%2==0 and y==x-1) cout << 1 << endl;
+            else cout << 0 << endl;
+        }
+    }
+
+    return 0;
+}
