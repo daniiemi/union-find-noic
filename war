@@ -9,10 +9,11 @@ vector<set<int>> gp (1);
 //n linhas codadas p ainda dar errado num problema trivial
 //oi, eu to no código da daniela //caba bom
 
-int find(int x) {
+int ufind(int x) {
     if(id[x]<=0) return id[x]*-1;
-    return id[x]=find(id[x]);
+    return id[x]=ufind(id[x]);
 }
+
 bool check(int i, int j) {
     if(gp[i].size()>gp[j].size()) swap(i,j);
     for(const auto& it : gp[i]) {
@@ -20,10 +21,15 @@ bool check(int i, int j) {
     }
     return false;
 }
+void blend(int i, int j) {
+    for(const auto& elem : gp[j]) gp[i].insert(elem);
+    gp[j].clear();
+    return;
+}
 
 bool join(int a, int b) {
-    int x=find(a);
-    int y=find(b);
+    int x=ufind(a);
+    int y=ufind(b);
 
     if(!x and !y) {
         id[a]=aux, id[b]=aux;
@@ -53,19 +59,31 @@ bool join(int a, int b) {
     int INMG_B = *gp[inmg_b].begin();
 
     if(peso[amg_a]<peso[amg_b]) { //convem q comece indo para b, puxando td dps
-        if(AMG_A) id[AMG_A]=(-1*amg_b);
-        if(INMG_A) id[INMG_A]=(-1*inmg_b);
+        if(AMG_A) {
+            id[AMG_A]=(-1*amg_b);
+            blend(amg_b,amg_a);
+        }
+        if(INMG_A) {
+            id[INMG_A]=(-1*inmg_b);
+            blend(inmg_b,inmg_a);
+        }
     } else {
-        if(AMG_B) id[AMG_B]=(-1*amg_a);
-        if(INMG_B) id[INMG_B]=(-1*inmg_a);
+        if(AMG_B) {
+            id[AMG_B]=(-1*amg_a);
+            blend(amg_a,amg_b);
+        }
+        if(INMG_B) {
+            id[INMG_B]=(-1*inmg_a);
+            blend(inmg_a,inmg_b);
+        }
     }
     if(peso[amg_a]==peso[amg_b]) peso[amg_a]++;
     
     return false;
 }
 bool disjoin(int a, int b) {
-    int x=find(a);
-    int y=find(b);
+    int x=ufind(a);
+    int y=ufind(b);
 
     if(!x and !y) {
         id[a]=aux, id[b]=aux-1;
@@ -96,11 +114,23 @@ bool disjoin(int a, int b) {
     int INMG_B = *gp[inmg_b].begin();
     
     if(peso[amg_a]<peso[inmg_b]) {
-        if(AMG_A) id[AMG_A]=(-1*inmg_b);
-        if(INMG_A) id[INMG_A]=(-1*amg_b);
+        if(AMG_A) {
+            id[AMG_A]=(-1*inmg_b);
+            blend(inmg_b,amg_a);
+        }
+        if(INMG_A) {
+            id[INMG_A]=(-1*amg_b);
+            blend(amg_b,inmg_a);
+        }
     } else {
-        if(AMG_B) id[AMG_B]=(-1*inmg_a);
-        if(INMG_B) id[INMG_B]=(-1*amg_a);
+        if(AMG_B) {
+            id[AMG_B]=(-1*inmg_a);
+            blend(inmg_a,amg_b);
+        }
+        if(INMG_B) {
+            id[INMG_B]=(-1*amg_a);
+            blend(amg_a,inmg_b);
+        }
     }
     if(peso[amg_a]==peso[inmg_b]) peso[amg_a]++;
     
@@ -116,11 +146,11 @@ int32_t main() {
         if(c==1 and join(x,y)) cout << -1 << endl;
         else if(c==2 and disjoin(x,y)) cout << -1 << endl;
         else if(c==3) {
-            x=find(x), y=find(y);
+            x=ufind(x), y=ufind(y);
             if(x==y and x!=0) cout << 1 << endl;
             else cout << 0 << endl;
         } else if(c==4) {
-            x=find(x), y=find(y);
+            x=ufind(x), y=ufind(y);
             if(x%2 and y==x+1) cout << 1 << endl;
             else if(x%2==0 and y==x-1) cout << 1 << endl;
             else cout << 0 << endl;
