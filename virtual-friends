@@ -1,0 +1,46 @@
+#include <bits/stdc++.h>
+#define int long long
+using namespace std;
+
+const int maxn=2e5;
+int id[maxn], peso[maxn], tam[maxn];
+map<string,int> cod;
+
+int find(int x) {
+    if(id[x]==x) return x;
+    return id[x]=find(id[x]);
+}
+
+int join(int x, int y) {
+    x=find(x), y=find(y);
+    if(x==y) return tam[x];
+
+    if(peso[y]>peso[x]) swap(x,y);
+    id[y]=x;
+    tam[x]+=tam[y];
+    if(peso[x]==peso[y]) peso[x]++;
+
+    return tam[x];
+}
+
+int32_t main() {
+    int t, f, aux;
+    cin >> t;
+
+    while(t-- and cin >> f) {
+        for(int i=0; i<maxn; ++i) {
+            id[i]=i;
+            peso[i]=0, tam[i]=1;
+        }
+
+        string s1, s2;
+        cod.clear(); aux=1;
+        while(f-- and cin >> s1 >> s2) {
+            if(!cod[s1]) cod[s1]=aux++;
+            if(!cod[s2]) cod[s2]=aux++;
+            cout << join(cod[s1],cod[s2]) << endl;
+        }
+    }
+
+    return 0;
+}
